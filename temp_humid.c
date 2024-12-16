@@ -17,18 +17,15 @@
 
 
 #include <errno.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <locale.h>
-#include <langinfo.h>
-#include <iconv.h>
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
 #include "i2cbusses.h"
-
+#include "common.h"
 
 #define I2CBUS				1
 
@@ -56,42 +53,14 @@ static void help(void)
 	fprintf(stderr,
 		"temp_humid v1 by Ivaylo\n"
 		"Usage: room_temp [[-b] -r | -h]\n"
-		"  Gets air temperature in deg C\n"
-		"  and humidity in %%\n"
-		"  -b   Bare format\n"
+		"  Gets air temperature in deg C and humidity in %%\n"
+		"  -b   Bare format (displays temperature only)\n"
 		"  -h   Print this help\n");
 	exit(1);
 }
 
 
-char degstr[5]; /* store the correct string to print degrees */
-
-
-static void set_degstr(void)
-{
-	const char *deg_default_text = "'C";
-
-	/* Size hardcoded for better performance.
-	   Don't forget to count the trailing \0! */
-	size_t deg_latin1_size = 3;
-	char *deg_latin1_text = "\260C";
-	size_t nconv;
-	size_t degstr_size = sizeof(degstr);
-	char *degstr_ptr = degstr;
-
-	iconv_t cd = iconv_open(nl_langinfo(CODESET), "ISO-8859-1");
-	if (cd != (iconv_t) -1) {
-		nconv = iconv(cd, &deg_latin1_text, &deg_latin1_size,
-			      &degstr_ptr, &degstr_size);
-		iconv_close(cd);
-
-		if (nconv != (size_t) -1)
-			return;
-	}
-
-	/* There was an error during the conversion, use the default text */
-	strcpy(degstr, deg_default_text);
-}
+extern char degstr[]; /* store the correct string to print degrees */
 
 uint8_t getStatus(int file) {
   int8_t ret = i2c_smbus_read_byte(file);

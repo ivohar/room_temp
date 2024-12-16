@@ -20,11 +20,11 @@ APP_LN_FLAGS=-li2c
 
 GENERIC_APP = temp_humid
 GENERIC_OBJS = temp_humid.o \
-			i2cbusses.o
+			i2cbusses.o common.o
 
 GENERIC_APP1 = room_temp
 GENERIC_OBJS1 = room_temp.o \
-			i2cbusses.o
+			i2cbusses.o common.o
 
 default: all
 
