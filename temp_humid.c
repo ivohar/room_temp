@@ -54,9 +54,10 @@
 static void help(void)
 {
 	fprintf(stderr,
-		"room_temp v1 by Ivaylo\n"
+		"temp_humid v1 by Ivaylo\n"
 		"Usage: room_temp [[-b] -r | -h]\n"
-		"  Gets room temperature in deg C\n"
+		"  Gets air temperature in deg C\n"
+		"  and humidity in %%\n"
 		"  -b   Bare format\n"
 		"  -h   Print this help\n");
 	exit(1);
