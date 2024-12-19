@@ -2,7 +2,7 @@
 
 Set of utils to measure ambient air temperature with an MCP9801 sensor or 
 air temperature and humidity with an AHT10 sensor, on a Raspberry Pi.
-Both sensors are I2C ones.
+Both are I2C sensors.
 
 ## SW requirements / dependancies
 * i2c-tools

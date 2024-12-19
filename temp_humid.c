@@ -12,7 +12,7 @@
  * Last revision	:  7/12/2024
  *
  * DESCRIPTION: Measure air temperature and humidity with AHT10 sensor
- *              to the i2c-1 bus (P1-03 and P1-05) of the raspberry pi
+ *              on the i2c-1 bus (P1-03 and P1-05) of the Raspberry pi
  * --------------------------------------------------------------------*/
 
 
@@ -29,10 +29,6 @@
 
 #define I2CBUS				1
 
-#define TEMP_REGISTER_ADDR	0
-#define CFG_REGISTER_ADDR	1
-#define CFG_VALUE			0x60
-#define CONV_TIMEOUT_MS		330
 #define TIMEOUT1_MS			10
 #define TIMEOUT2_MS			20
 
@@ -46,7 +42,7 @@
 
 //#define DEBUG
 //#define DEBUG_GET_STATUS
-//#define AHT10_SOFTRESET
+#define AHT10_SOFTRESET
 
 static void help(void)
 {
@@ -115,7 +111,9 @@ int main(int argc, char *argv[])
 #endif
 
 	while (getStatus(file) & AHTX0_STATUS_BUSY) {
+#if defined(DEBUG)		
 		printf("\nWait after soft reset\n");
+#endif
 		usleep(TIMEOUT1_MS*1000);
 	}		
 
@@ -123,7 +121,9 @@ int main(int argc, char *argv[])
 	i2c_smbus_write_i2c_block_data(file, AHTX0_CMD_CALIBRATE, 2, data_cal);
 
 	while (getStatus(file) & AHTX0_STATUS_BUSY) {
+#if defined(DEBUG)		
 		printf("\nWait after calibrate\n");
+#endif
 		usleep(TIMEOUT1_MS*1000);
 	}
 	if (!(getStatus(file) & AHTX0_STATUS_CALIBRATED)) {

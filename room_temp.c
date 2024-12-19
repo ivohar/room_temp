@@ -9,10 +9,10 @@
  * Author           :  Ivaylo Haratcherev
  * Acknowledgements :  Using some code from i2c-tools and lm-sensors
  * Created			:  3/2/2014
- * Last revision	:  3/2/2014
+ * Last revision	:  1/12/2024
  *
  * DESCRIPTION: Measure ambient room air temperature with MCP9801 sensor
- *              to the i2c-1 bus (P1-03 and P1-05) of the raspberry pi
+ *              on the i2c-1 bus (P1-03 and P1-05) of the Raspberry pi
  * --------------------------------------------------------------------*/
 
 
