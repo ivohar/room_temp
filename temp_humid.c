@@ -13,6 +13,8 @@
  *
  * DESCRIPTION: Measure air temperature and humidity with AHT10 sensor
  *              on the i2c-1 bus (P1-03 and P1-05) of the Raspberry pi
+ * NOTE: 		The AHT10 sensor is a low-cost sensor that does not seem
+ * 				to be very accurate in terms of humidity measurement.
  * --------------------------------------------------------------------*/
 
 
@@ -29,8 +31,9 @@
 
 #define I2CBUS				1
 
-#define TIMEOUT1_MS			10
-#define TIMEOUT2_MS			20
+#define TOUT_10_MS			10
+#define TOUT_20_MS			20
+#define BUSY_WAIT_RETRIES	20
 
 #define AHTX0_I2CADDR_DEFAULT 0x38   ///< AHT default i2c address
 #define AHTX0_I2CADDR_ALTERNATE 0x39 ///< AHT alternate i2c address
@@ -42,7 +45,8 @@
 
 //#define DEBUG
 //#define DEBUG_GET_STATUS
-#define AHT10_SOFTRESET
+//#define AHT10_SOFTRESET
+//#define AHT10_CALIBRATE_EXIT_ON_FAIL
 
 static void help(void)
 {
@@ -58,7 +62,7 @@ static void help(void)
 
 extern char degstr[]; /* store the correct string to print degrees */
 
-uint8_t getStatus(int file) {
+static uint8_t getStatus(int file) {
   int8_t ret = i2c_smbus_read_byte(file);
 #if defined(DEBUG_GET_STATUS)  
   printf("status:0x%02x ", ret & 0xff);
@@ -67,6 +71,21 @@ uint8_t getStatus(int file) {
     return 0xFF;
   }
   return (uint8_t)ret;
+}
+
+static int busy_wait_limited(int file, uint8_t loop_delay_ms, uint8_t max_retries) {
+  uint8_t retries = 0;
+  while (getStatus(file) & AHTX0_STATUS_BUSY) {
+	usleep(loop_delay_ms * 1000);
+#if defined(DEBUG)		
+		printf("Busy wait...%d\n", retries);
+#endif
+	retries++;
+	if (retries > max_retries) {
+	  return -1;
+	}
+  }
+  return 0;
 }
 
 int main(int argc, char *argv[])
@@ -104,52 +123,49 @@ int main(int argc, char *argv[])
 
 #if defined(AHT10_SOFTRESET)
 	if (i2c_smbus_write_byte(file, AHTX0_CMD_SOFTRESET) < 0) {
-			fprintf(stderr, "Error: reset failed\n");
-			exit(2);
+		fprintf(stderr, "Error: reset failed\n");
+		exit(2);
 	}
-	usleep(TIMEOUT2_MS*1000);
-#endif
+	usleep(TOUT_20_MS*1000);
 
-	while (getStatus(file) & AHTX0_STATUS_BUSY) {
-#if defined(DEBUG)		
-		printf("\nWait after soft reset\n");
+	if (busy_wait_limited(file, TOUT_10_MS, BUSY_WAIT_RETRIES) < 0) {
+		fprintf(stderr, "Error: reset busy timeout\n");
+		exit(2);
+	}
 #endif
-		usleep(TIMEOUT1_MS*1000);
-	}		
 
 	uint8_t data_cal[2] = {0x08, 0x00};
-	i2c_smbus_write_i2c_block_data(file, AHTX0_CMD_CALIBRATE, 2, data_cal);
-
-	while (getStatus(file) & AHTX0_STATUS_BUSY) {
-#if defined(DEBUG)		
-		printf("\nWait after calibrate\n");
+	if (i2c_smbus_write_i2c_block_data(file, AHTX0_CMD_CALIBRATE, 2, data_cal) < 0) {
+#if defined(AHT10_CALIBRATE_EXIT_ON_FAIL)
+		fprintf(stderr, "Error: send calibrate cmd failed\n");
+		exit(2);
 #endif
-		usleep(TIMEOUT1_MS*1000);
 	}
+
+	if (busy_wait_limited(file, TOUT_10_MS, BUSY_WAIT_RETRIES) < 0) {
+		fprintf(stderr, "Error: calibrate busy timeout\n");
+		exit(2);
+	}
+
 	if (!(getStatus(file) & AHTX0_STATUS_CALIBRATED)) {
-			fprintf(stderr, "Error: calibration failed\n");
-			exit(2);
+		fprintf(stderr, "Error: calibration failed\n");
+		exit(2);
 	}	
 
 	uint8_t data_trig[2] = {0x33, 0x00};
-	i2c_smbus_write_i2c_block_data(file, AHTX0_CMD_TRIGGER, 2, data_trig);
+	if (i2c_smbus_write_i2c_block_data(file, AHTX0_CMD_TRIGGER, 2, data_trig) < 0) {
+		fprintf(stderr, "Error: send trigger cmd failed\n");
+		exit(2);
+	}
 
-	while (getStatus(file) & AHTX0_STATUS_BUSY) {
-#if defined(DEBUG)		
-		printf("\nWait after trigger\n");
-#endif
-		usleep(TIMEOUT2_MS*1000);
+	if(busy_wait_limited(file, TOUT_20_MS, BUSY_WAIT_RETRIES) < 0) {
+		fprintf(stderr, "Error: trigger busy timeout\n");
+		exit(2);
 	}
 
 	uint8_t data[6] = {0};
-	int res;
 
-   	res = i2c_smbus_read_i2c_block_data(file, 0x00, 6, data);
-#if defined(DEBUG)	
-	printf("res: 0x%x\n",res);
-#endif
-	if (res < 0)
-	{
+   	if (i2c_smbus_read_i2c_block_data(file, 0x00, 6, data) < 0) {
 	 	fprintf(stderr, "Error: reading values failed\n");
 	 	exit(2);
 	}
