@@ -26,6 +26,10 @@ GENERIC_APP1 = room_temp
 GENERIC_OBJS1 = room_temp.o \
 			i2cbusses.o common.o
 
+GENERIC_APP2 = temp_humid2
+GENERIC_OBJS2 = temp_humid2.o \
+			i2cbusses.o common.o
+
 default: all
 
 %.o : %.c 
@@ -39,10 +43,14 @@ $(GENERIC_APP1) : $(GENERIC_OBJS1)
 	$(CC) $(GENERIC_OBJS1) $(APP_LN_FLAGS) -o $(GENERIC_APP1)
 	$(STRIP) -s $(GENERIC_APP1) 
 
-all: $(GENERIC_APP) $(GENERIC_APP1)	
+$(GENERIC_APP2) : $(GENERIC_OBJS2)
+	$(CC) $(GENERIC_OBJS2) $(APP_LN_FLAGS) -o $(GENERIC_APP2)
+	$(STRIP) -s $(GENERIC_APP2) 
+
+all: $(GENERIC_APP) $(GENERIC_APP1) $(GENERIC_APP2)
 
 clean :
 	@echo "  CLEAN	."
 	find . -name "*.[oa]" -exec rm {} \;
-	rm -f *.o $(GENERIC_APP) $(GENERIC_APP1)
+	rm -f *.o $(GENERIC_APP) $(GENERIC_APP1) $(GENERIC_APP2)
 

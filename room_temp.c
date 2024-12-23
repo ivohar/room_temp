@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
 {
 	char *end;
 	int res, file;
-	int daddress;
 	char filename[20];
 	int flags = 0;
 	int raw_fmt = 0, bare_fmt = 0;
