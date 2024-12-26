@@ -2,21 +2,21 @@
  *                           room_temp.c
  * ---------------------------------------------------------------------
  * 
- * Copyright (c) 2013 Ivaylo Haratcherev
+ * Copyright (c) 2013-2024 Ivaylo Haratcherev
  * All Rights Reserved
  * 
  * 
  * Author           :  Ivaylo Haratcherev
  * Acknowledgements :  Using some code from i2c-tools and examples 
  *                     regarding AHT10 and SHT30 sensors
- * Created			:  3/2/2014
- * Last revision	:  27/12/2024
+ * Created          :  3/2/2014
+ * Last revision    :  26/12/2024
  *
  * DESCRIPTION: Measure ambient air temperature with MCP9801 sensor
  *              or temperature and humidity with AHT10 or SHT30 sensor
  *              on the i2c-1 bus (P1-03 and P1-05) of the Raspberry pi
- * NOTE: 		The AHT10 sensor is a low-cost sensor that does not seem
- * 				to be very accurate in terms of humidity measurement.
+ * NOTE:        The AHT10 sensor is a low-cost sensor that does not seem
+ * 	            to be very accurate in terms of humidity measurement.
  * --------------------------------------------------------------------*/
 
 
@@ -37,31 +37,31 @@
 #include <i2c/smbus.h>
 
 
-#define I2CBUS_FILE			"/dev/i2c-1"
+#define I2CBUS_FILE         "/dev/i2c-1"
 
-#define MCP9801_ADDR		0x4f
-#define MCP9801_TEMPER_REG	0
-#define MCP9801_CFG_REG		1
-#define MCP9801_CFG_VALUE			0x60
-#define MCP9801_CONV_TOUT_MS		330
+#define MCP9801_ADDR            0x4f
+#define MCP9801_TEMPER_REG      0
+#define MCP9801_CFG_REG	        1
+#define MCP9801_CFG_VALUE       0x60
+#define MCP9801_CONV_TOUT_MS    330
 
-#define TOUT_10_MS			10
-#define TOUT_20_MS			20
-#define BUSY_WAIT_RETRIES	20
+#define TOUT_10_MS          10
+#define TOUT_20_MS          20
+#define BUSY_WAIT_RETRIES   20
 
-#define AHTX0_ADDR_DEFAULT 0x38   ///< AHT default i2c address
-#define AHTX0_ADDR_ALTERNATE 0x39 ///< AHT alternate i2c address
-#define AHTX0_CMD_CALIBRATE 0xE1     ///< Calibration command
-#define AHTX0_CMD_TRIGGER 0xAC       ///< Trigger reading command
-#define AHTX0_CMD_SOFTRESET 0xBA     ///< Soft reset command
-#define AHTX0_STATUS_BUSY 0x80       ///< Status bit for busy
-#define AHTX0_STATUS_CALIBRATED 0x08 ///< Status bit for calibrated
+#define AHTX0_ADDR_DEFAULT      0x38    ///< AHT default i2c address
+#define AHTX0_ADDR_ALTERNATE    0x39    ///< AHT alternate i2c address
+#define AHTX0_CMD_CALIBRATE     0xE1    ///< Calibration command
+#define AHTX0_CMD_TRIGGER       0xAC    ///< Trigger reading command
+#define AHTX0_CMD_SOFTRESET     0xBA    ///< Soft reset command
+#define AHTX0_STATUS_BUSY       0x80    ///< Status bit for busy
+#define AHTX0_STATUS_CALIBRATED 0x08    ///< Status bit for calibrated
 
-#define SHT30_ADDR_DEFAULT 0x44   ///< SHT default i2c address
-#define SHT30_CMD_MEAS_HREP_CSTRETCH_MSB 0x2C  ///< Measurement High Repeatability with Clock Stretch Enabled
-#define SHT30_CMD_MEAS_HREP_CSTRETCH_LSB 0x06  ///< --
-#define SHT30_CMD_MEAS_HREP_MSB 0x24       ///< Measurement High Repeatability with Clock Stretch Disabled
-#define SHT30_CMD_MEAS_HREP_LSB 0x00       ///< --
+#define SHT30_ADDR_DEFAULT      0x44    ///< SHT default i2c address
+#define SHT30_CMD_MEAS_HREP_CSTRETCH_MSB 0x2C   ///< Measurement High Repeatability with Clock Stretch Enabled
+#define SHT30_CMD_MEAS_HREP_CSTRETCH_LSB 0x06   ///< --
+#define SHT30_CMD_MEAS_HREP_MSB 0x24    ///< Measurement High Repeatability with Clock Stretch Disabled
+#define SHT30_CMD_MEAS_HREP_LSB 0x00    ///< --
 
 //#define DEBUG
 //#define DEBUG_GET_STATUS
@@ -203,7 +203,7 @@ int8_t read_sht30(int file, float * temp, float * humi)
 		return -1;
 	}
 
-	usleep(20 * 1000);
+	usleep(TOUT_20_MS * 1000);
 
 	uint8_t data[6] = {0};
 
