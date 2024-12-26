@@ -16,7 +16,7 @@
  *              or temperature and humidity with AHT10 or SHT30 sensor
  *              on the i2c-1 bus (P1-03 and P1-05) of the Raspberry pi
  * NOTE:        The AHT10 sensor is a low-cost sensor that does not seem
- * 	            to be very accurate in terms of humidity measurement.
+ *              to be very accurate in terms of humidity measurement.
  * --------------------------------------------------------------------*/
 
 
